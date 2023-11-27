@@ -10,35 +10,24 @@ namespace BookStoreApp.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BooksController : ControllerBase
+    public class BooksController(BookStoreDbContext _context, IMapper _mapper, ILogger<BooksController> _logger) : ControllerBase
     {
-        private readonly BookStoreDbContext _context;
-        private readonly IMapper mapper;
-        private readonly ILogger logger;
-
-        public BooksController(BookStoreDbContext context, IMapper mapper, ILogger<BooksController> logger)
-        {
-            _context = context;
-            this.mapper = mapper;
-            this.logger = logger;
-        }
-
         // GET: api/Books
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookReadOnlyDto>>> GetBooks()
         {
             try
             {
-                logger.LogInformation($"Request to {nameof(GetBooks)}");
+                _logger.LogInformation($"Request to {nameof(GetBooks)}");
                 var bookDtos = await _context.Books
                     .Include(x => x.Author)
-                    .ProjectTo<BookReadOnlyDto>(mapper.ConfigurationProvider)
+                    .ProjectTo<BookReadOnlyDto>(_mapper.ConfigurationProvider)
                     .ToListAsync();
 
                 return Ok(bookDtos);
             }
             catch (Exception ex) {
-                logger.LogError(ex, $"Error Performing GET in {nameof(GetBooks)}");
+                _logger.LogError(ex, $"Error Performing GET in {nameof(GetBooks)}");
                 return StatusCode(500, Messages.Error500Message);
             }
         }
@@ -49,15 +38,15 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                logger.LogInformation($"Request to {nameof(GetBook)}");
+                _logger.LogInformation($"Request to {nameof(GetBook)}");
                 var book = await _context.Books
                     .Include(x => x.Author)
-                    .ProjectTo<BookDetailDto>(mapper.ConfigurationProvider)
+                    .ProjectTo<BookDetailDto>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (book == null)
                 {
-                    logger.LogWarning($"{nameof(GetBook)}: Book with id {id} not found");
+                    _logger.LogWarning($"{nameof(GetBook)}: Book with id {id} not found");
                     return NotFound();
                 }
 
@@ -65,7 +54,7 @@ namespace BookStoreApp.API.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error Performing GET in {nameof(GetBook)}");
+                _logger.LogError(ex, $"Error Performing GET in {nameof(GetBook)}");
                 return StatusCode(500, Messages.Error500Message);
             }
         }
@@ -77,21 +66,21 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                logger.LogInformation($"Request to {nameof(PutBook)}");
+                _logger.LogInformation($"Request to {nameof(PutBook)}");
                 if (id != bookDto.Id)
                 {
-                    logger.LogWarning($"{PutBook}: id and dto id mismatch");
+                    _logger.LogWarning($"{PutBook}: id and dto id mismatch");
                     return BadRequest();
                 }
 
                 var book = await _context.Books.FindAsync(id);
                 if (book is null)
                 {
-                    logger.LogWarning($"{PutBook}: no books found with id {id}");
+                    _logger.LogWarning($"{PutBook}: no books found with id {id}");
                     return NotFound();
                 }
 
-                mapper.Map(bookDto, book);
+                _mapper.Map(bookDto, book);
                 _context.Entry(book).State = EntityState.Modified;
 
                 try
@@ -102,7 +91,7 @@ namespace BookStoreApp.API.Controllers
                 {
                     if (!BookExists(id))
                     {
-                        logger.LogWarning($"{PutBook}: Book with {id} not found.");
+                        _logger.LogWarning($"{PutBook}: Book with {id} not found.");
                         return NotFound();
                     }
                     else
@@ -115,7 +104,7 @@ namespace BookStoreApp.API.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error Performing PUT in {nameof(PutBook)}");
+                _logger.LogError(ex, $"Error Performing PUT in {nameof(PutBook)}");
                 return StatusCode(500, Messages.Error500Message);
             }
         }
@@ -127,8 +116,8 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                logger.LogInformation($"Request to {nameof(PutBook)}");
-                var book = mapper.Map<Book>(bookDto);
+                _logger.LogInformation($"Request to {nameof(PutBook)}");
+                var book = _mapper.Map<Book>(bookDto);
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
 
@@ -136,7 +125,7 @@ namespace BookStoreApp.API.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error Performing POST in {nameof(PostBook)}");
+                _logger.LogError(ex, $"Error Performing POST in {nameof(PostBook)}");
                 return StatusCode(500, Messages.Error500Message);
             }
         }
@@ -147,11 +136,11 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                logger.LogInformation($"Request to {nameof(PutBook)}");
+                _logger.LogInformation($"Request to {nameof(PutBook)}");
                 var book = await _context.Books.FindAsync(id);
                 if (book == null)
                 {
-                    logger.LogWarning($"{nameof(DeleteBook)}: No book found for id {id}");
+                    _logger.LogWarning($"{nameof(DeleteBook)}: No book found for id {id}");
                     return NotFound();
                 }
 
@@ -162,7 +151,7 @@ namespace BookStoreApp.API.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Error Performing DELETE in {nameof(DeleteBook)}");
+                _logger.LogError(ex, $"Error Performing DELETE in {nameof(DeleteBook)}");
                 return StatusCode(500, Messages.Error500Message);
             }
         }
