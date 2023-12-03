@@ -2,11 +2,13 @@
 using BookStoreApp.API.Data;
 using BookStoreApp.API.Models.Authors;
 using BookStoreApp.API.Static;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreApp.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthorsController(BookStoreDbContext _context, IMapper _mapper, ILogger<AuthorsController> _logger) : ControllerBase
@@ -57,6 +59,7 @@ namespace BookStoreApp.API.Controllers
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> PutAuthor(int id, AuthorUpdateDto authorDto)
         {
             try
@@ -107,6 +110,7 @@ namespace BookStoreApp.API.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<ActionResult<AuthorCreateDto>> PostAuthor(AuthorCreateDto authorDto)
         {
             try
@@ -127,6 +131,7 @@ namespace BookStoreApp.API.Controllers
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
             try

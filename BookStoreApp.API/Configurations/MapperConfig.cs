@@ -2,12 +2,14 @@
 using BookStoreApp.API.Data;
 using BookStoreApp.API.Models.Authors;
 using BookStoreApp.API.Models.Books;
+using BookStoreApp.API.Models.User;
 
 namespace BookStoreApp.API.Configurations
 {
     public class MapperConfig : Profile
     {
-        public MapperConfig() {
+        public MapperConfig()
+        {
             CreateMap<Author, AuthorCreateDto>();
             CreateMap<Author, AuthorReadOnlyDto>();
             CreateMap<AuthorUpdateDto, Author>();
@@ -20,6 +22,10 @@ namespace BookStoreApp.API.Configurations
                 .ForMember(e => e.AuthorName, d => d.MapFrom(map => $"{map.Author.FirstName} {map.Author.LastName}"));
             CreateMap<BookUpdateDto, Book>();
             CreateMap<BookCreateDto, Book>();
+
+            CreateMap<UserDto, ApiUser>()
+                .ForMember(e => e.UserName, d => d.MapFrom(map => map.Email));
+;
         }
     }
 }
